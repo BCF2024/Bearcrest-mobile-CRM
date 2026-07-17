@@ -1,0 +1,19 @@
+{
+  "name": "BearCrest Mobile CRM 6.0",
+  "short_name": "BearCrest CRM",
+  "description": "Phone-first BearCrest Funding mobile loan CRM",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#eef2ef",
+  "theme_color": "#073f2c",
+  "icons": [
+    {
+      "src": "bcf-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

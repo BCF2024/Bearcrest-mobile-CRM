@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#073f2c" />
+  <title>BearCrest Mobile CRM — Version 6.0</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="auth-locked v5-body">
+  <section id="loginScreen" class="login-screen" aria-label="Secure login">
+    <div class="login-card">
+      <img src="bcf-logo.png" alt="BearCrest Funding, LLC logo" class="login-logo" />
+      <div class="login-kicker">BEARCREST FUNDING, LLC</div>
+      <h1>Loan CRM</h1>
+      <p>Sign in to access your private lending dashboard.</p>
+      <form id="loginForm" autocomplete="on">
+        <label>Username<input id="loginUsername" autocomplete="username" required /></label>
+        <label>Password<div class="password-wrap"><input id="loginPassword" type="password" autocomplete="current-password" required /><button id="togglePasswordBtn" type="button" class="show-password">Show</button></div></label>
+        <div id="loginError" class="login-error" role="alert"></div>
+        <button type="submit" class="primary login-button">Sign In</button>
+      </form>
+      <div class="login-note">Private BearCrest business system</div>
+    </div>
+  </section>
+
+  <div class="mobile-appbar">
+    <button id="mobileMenuBtn" aria-label="Open navigation">☰</button>
+    <div><strong>BearCrest Mobile</strong><small>Version 6.0</small></div>
+    <button id="mobileQuickAddBtn" aria-label="Add loan">＋</button>
+  </div>
+  <div id="mobileNavBackdrop" class="mobile-nav-backdrop hidden"></div>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <img src="bcf-logo.png" alt="BCF logo" />
+        <div>
+          <strong>BEARCREST</strong>
+          <span>FUNDING, LLC</span>
+        </div>
+      </div>
+
+      <nav class="side-nav" aria-label="CRM navigation">
+        <button class="nav-item active" data-view="dashboard">⌂ <span>Dashboard</span></button>
+        <button class="nav-item" data-view="pipeline">▦ <span>Pipeline</span></button>
+        <button class="nav-item" data-view="loans">▤ <span>Loans</span></button>
+        <button class="nav-item" data-view="calendar">□ <span>Calendar</span></button>
+        <button class="nav-item" data-view="tasks">☑ <span>Tasks</span></button>
+        <button class="nav-item" data-view="contacts">♙ <span>Contacts</span></button>
+        <button class="nav-item" data-view="lenders">▰ <span>Lenders</span></button>
+        <button class="nav-item" data-view="documents">▧ <span>Documents</span></button>
+        <button class="nav-item" data-view="communication">✉ <span>Communication</span></button>
+        <button class="nav-item" data-view="reports">▥ <span>Reports</span></button>
+        <button class="nav-item" data-view="archive">▣ <span>Archive</span></button>
+        <button class="nav-item" id="sidebarSettingsBtn">⚙ <span>Settings</span></button>
+      </nav>
+
+      <div class="sidebar-card">
+        <h4>SMART SYNC</h4>
+        <div class="connection-line"><span class="status-dot"></span><strong id="v5CloudStatus">Checking...</strong></div>
+        <small id="v5SyncTime">Smart Sync ready</small>
+        <button id="v5SyncBtn">SYNC NOW</button>
+      </div>
+
+      <div class="sidebar-card">
+        <h4>STORAGE</h4>
+        <small>Drive Folder</small>
+        <strong id="v5StorageName">BearCrest CRM Documents</strong>
+        <button id="v5OpenStorageBtn">OPEN FOLDER</button><button id="installAppBtn" class="hidden">INSTALL APP</button>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <div>
+          <h1>BEARCREST MOBILE CRM <span>V6.0</span></h1>
+          <p id="viewSubtitle">Business-purpose lending operations dashboard</p>
+        </div>
+        <div class="top-actions">
+          <button id="applicationBtn">Open Application</button>
+          <button id="syncApplicationsBtn">Sync New Applications</button>
+          <button id="exportBtn">Export</button>
+          <label class="import-label">Import<input id="importFile" type="file" accept=".json" hidden /></label>
+          <label class="import-label hidden">Import CSV<input id="csvFile" type="file" accept=".csv,text/csv" hidden /></label>
+          <button id="templateBtn" class="hidden">Template</button>
+          <button id="cloudSetupBtn">Settings</button>
+          <button id="logoutBtn" class="avatar-btn">JV</button>
+        </div>
+      </header>
+
+      <main class="v5-main">
+
+        <section id="mobileHomeView" class="app-view mobile-home-view">
+          <div class="mobile-greeting">
+            <div><small id="mobileTodayLabel">TODAY</small><h2>Good day, Joel</h2><p>Your BearCrest business at a glance.</p></div>
+            <button id="mobileAvatarBtn" class="mobile-avatar">JV</button>
+          </div>
+
+          <div class="mobile-search-wrap">
+            <span>⌕</span><input id="mobileGlobalSearch" placeholder="Search borrower, property, loan #..." autocomplete="off" />
+            <div id="mobileSearchResults" class="mobile-search-results hidden"></div>
+          </div>
+
+          <div class="mobile-quick-grid">
+            <button id="mobileNewLoanAction" class="mobile-quick primary-quick"><b>＋</b><span>New Loan</span></button>
+            <button id="mobileSyncAction" class="mobile-quick"><b>↻</b><span>Sync</span></button>
+            <button id="mobileScanAction" class="mobile-quick"><b>▣</b><span>Scan Doc</span></button>
+            <button id="mobileContactsAction" class="mobile-quick"><b>♙</b><span>Contacts</span></button>
+          </div>
+
+          <section class="mobile-metric-strip" id="mobileMetricStrip"></section>
+
+          <section class="mobile-section-card attention-card">
+            <div class="mobile-section-heading"><div><small>PRIORITY</small><h3>Needs Attention</h3></div><button data-mobile-go="tasks">View all</button></div>
+            <div id="mobileAttentionList"></div>
+          </section>
+
+          <section class="mobile-section-card">
+            <div class="mobile-section-heading"><div><small>PIPELINE</small><h3>Recent Loans</h3></div><button data-mobile-go="pipeline">View all</button></div>
+            <div id="mobileRecentList"></div>
+          </section>
+
+          <section class="mobile-section-card">
+            <div class="mobile-section-heading"><div><small>QUICK TOOLS</small><h3>Field Mode</h3></div></div>
+            <div class="field-tools">
+              <button id="fieldCallBtn">☎<span>Call Borrower</span></button>
+              <button id="fieldTextBtn">✉<span>Text Borrower</span></button>
+              <button id="fieldMapBtn">⌖<span>Property Map</span></button>
+              <button id="fieldNoteBtn">✎<span>Quick Note</span></button>
+            </div>
+          </section>
+        </section>
+        <section id="dashboardView" class="app-view">
+          <div class="welcome-row">
+            <div>
+              <h2>Dashboard</h2>
+              <p>Everything needing attention across your loan pipeline.</p>
+            </div>
+            <button id="addLoanBtn" class="primary">+ Add Loan</button>
+          </div>
+
+          <section class="stats" id="stats"></section>
+
+          <div class="dashboard-grid">
+            <section class="v5-card pipeline-snapshot">
+              <div class="card-heading"><h3>Pipeline Snapshot</h3><button class="text-button" data-go="pipeline">View Pipeline</button></div>
+              <div id="v5PipelineBars" class="pipeline-bars"></div>
+            </section>
+
+            <section class="v5-card">
+              <div class="card-heading"><h3>Follow-Ups</h3><button id="todayBtn" class="text-button">View Due</button></div>
+              <div id="v5FollowupPreview"></div>
+            </section>
+
+            <section class="v5-card recent-loans-card">
+              <div class="card-heading"><h3>Recent Loans</h3><button class="text-button" data-go="loans">View All</button></div>
+              <div id="v5RecentLoans"></div>
+            </section>
+
+            <section class="v5-card">
+              <div class="card-heading"><h3>Recent Communication</h3><button class="text-button" data-go="communication">View All</button></div>
+              <div id="v5CommunicationPreview"></div>
+            </section>
+          </div>
+        </section>
+
+        <section id="pipelineView" class="app-view">
+          <div class="view-heading">
+            <div><h2>Loan Pipeline</h2><p>Search, filter, open, and move loans through the process.</p></div>
+            <button id="v5AddLoanBtn" class="primary">+ Add Loan</button>
+          </div>
+          <section class="toolbar">
+            <input id="searchInput" placeholder="Search borrower, property, lender, phone..." />
+            <select id="statusFilter">
+              <option value="">All active statuses</option><option>New Lead</option><option>Reviewing</option><option>Submitted</option><option>Approved</option><option>Closing</option><option>Closed</option><option>Dead</option><option>Archived</option>
+            </select>
+            <button id="archiveBtn">Archived Loans</button>
+            <button id="viewToggleBtn">Board View</button>
+            <div id="syncStatus" class="sync-status">Smart Sync ready</div>
+          </section>
+          <section class="panel" id="tablePanel">
+            <div class="panel-title"><h2>Loans</h2><span id="loanCount"></span></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Loan #</th><th>Borrower</th><th>Program</th><th>Property</th><th>Status</th><th>Loan Amount</th><th>Lender</th><th>Next Follow-Up</th><th></th></tr></thead>
+                <tbody id="loanTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+          <section class="board hidden" id="boardPanel"></section>
+        </section>
+
+        <section id="calendarView" class="app-view">
+          <div class="view-heading">
+            <div><h2>Calendar</h2><p>Follow-ups, closings, expirations, and custom loan events.</p></div>
+            <div class="view-actions">
+              <button id="calendarTodayBtn">Today</button>
+              <button id="calendarPrevBtn">← Previous</button>
+              <button id="calendarNextBtn">Next →</button>
+              <button id="newCalendarEventBtn" class="primary">+ New Event</button>
+            </div>
+          </div>
+          <section class="v5-card">
+            <div class="calendar-title-row">
+              <h3 id="calendarMonthTitle"></h3>
+              <div class="calendar-legend">
+                <span><i class="legend-dot followup"></i>Follow-Up</span>
+                <span><i class="legend-dot closing"></i>Closing</span>
+                <span><i class="legend-dot expiration"></i>Expiration</span>
+                <span><i class="legend-dot custom"></i>Custom</span>
+              </div>
+            </div>
+            <div class="calendar-weekdays">
+              <span>Sunday</span><span>Monday</span><span>Tuesday</span><span>Wednesday</span><span>Thursday</span><span>Friday</span><span>Saturday</span>
+            </div>
+            <div id="calendarGrid" class="calendar-grid"></div>
+          </section>
+        </section>
+
+        <section id="tasksView" class="app-view">
+          <div class="view-heading">
+            <div><h2>Task Center</h2><p>Manage borrower calls, documents, submissions, underwriting, and closing work.</p></div>
+            <button id="newTaskBtn" class="primary">+ New Task</button>
+          </div>
+          <section id="taskStats" class="task-stats"></section>
+          <section class="task-toolbar">
+            <input id="taskSearch" placeholder="Search tasks, borrower, property..." />
+            <select id="taskStatusFilter">
+              <option value="">Open Tasks</option>
+              <option value="all">All Tasks</option>
+              <option value="completed">Completed</option>
+              <option value="overdue">Overdue</option>
+              <option value="today">Due Today</option>
+            </select>
+            <select id="taskPriorityFilter">
+              <option value="">All Priorities</option>
+              <option>High</option><option>Medium</option><option>Low</option>
+            </select>
+          </section>
+          <section class="v5-card"><div id="taskList" class="task-list"></div></section>
+        </section>
+
+        <section id="contactsView" class="app-view">
+          <div class="view-heading">
+            <div><h2>Contacts</h2><p>Borrowers, brokers, Realtors, title companies, insurance agents, attorneys, and lenders.</p></div>
+            <button id="newContactBtn" class="primary">+ New Contact</button>
+          </div>
+          <section class="contact-stats" id="contactStats"></section>
+          <section class="contact-toolbar">
+            <input id="contactSearch" placeholder="Search name, company, email, phone..." />
+            <select id="contactTypeFilter">
+              <option value="">All Contact Types</option>
+              <option>Borrower</option><option>Broker</option><option>Realtor</option><option>Title Company</option>
+              <option>Insurance Agent</option><option>Attorney</option><option>Lender</option><option>Contractor</option><option>Other</option>
+            </select>
+            <button id="exportContactsBtn">Export Contacts</button>
+            <label class="import-label">Import CSV<input id="importContactsFile" type="file" accept=".csv,text/csv" hidden /></label>
+          </section>
+          <section class="v5-card">
+            <div id="contactList" class="contact-list"></div>
+          </section>
+        </section>
+
+        <section id="documentsView" class="app-view">
+          <div class="view-heading">
+            <div><h2>Document Library</h2><p>Reusable templates and files you regularly send to borrowers and clients.</p></div>
+            <div class="view-actions">
+              <button id="refreshDocumentLibraryBtn">Refresh</button>
+              <label class="library-upload-btn primary">+ Upload Document<input id="libraryDocumentInput" type="file" multiple hidden /></label>
+            </div>
+          </div>
+          <section class="document-library-stats" id="documentLibraryStats"></section>
+          <section class="document-library-toolbar">
+            <input id="documentLibrarySearch" placeholder="Search document name or category..." />
+            <select id="documentLibraryCategory">
+              <option value="">All Categories</option>
+              <option>Applications</option><option>Needs Lists</option><option>Pre-Approvals</option><option>Decline Letters</option>
+              <option>Rehab Budgets</option><option>Track Records</option><option>Experience Forms</option><option>Entity Documents</option>
+              <option>Loan Guidelines</option><option>Marketing</option><option>Other</option>
+            </select>
+          </section>
+          <section class="v5-card">
+            <div id="documentLibraryStatus" class="library-status"></div>
+            <div id="documentLibraryList" class="document-library-list"></div>
+          </section>
+        </section>
+
+        <section id="placeholderView" class="app-view">
+          <div class="view-heading"><div><h2 id="placeholderTitle">Coming Soon</h2><p id="placeholderText"></p></div></div>
+          <div class="v5-card empty-module">
+            <img src="bcf-logo.png" alt="" />
+            <h3 id="placeholderCardTitle">Module ready for the next phase</h3>
+            <p>The redesigned navigation is in place. This section can be expanded while the daily loan workflow remains fully operational.</p>
+          </div>
+        </section>
+      <input id="mobileCameraInput" type="file" accept="image/*,.pdf" capture="environment" hidden />
+      </main>
+
+      <footer class="status-footer">
+        <span>© 2026 BearCrest Funding, LLC</span>
+        <span id="v5FooterStats">CRM ready</span>
+      </footer>
+    </div>
+  </div>
+
+  <dialog id="loanDialog">
+    <form method="dialog" id="loanForm">
+      <div class="dialog-header"><h2 id="dialogTitle">Add Loan</h2><button type="button" id="closeDialogBtn" class="close-btn" aria-label="Close">×</button></div>
+      <input type="hidden" id="loanId" />
+      <div class="form-grid">
+        <label>Loan Number<input id="loanNumber" required /></label>
+        <label>Date Received<input id="dateReceived" type="date" /></label>
+        <label>Borrower Name<input id="borrowerName" required /></label>
+        <label>Phone<input id="phone" /></label>
+        <label>Email<input id="email" type="email" /></label>
+        <label>Borrowing Entity<input id="entityName" /></label>
+        <label>Loan Program<select id="program"><option>Fix & Flip</option><option>BCF 100</option><option>DSCR</option><option>Ground-Up Construction</option><option>Bridge</option><option>Multifamily</option><option>Transactional Funding</option><option>Other</option></select></label>
+        <label class="wide">Property Address<input id="propertyAddress" /></label>
+        <label>Loan Amount<input id="loanAmount" type="number" step="100" /></label>
+        <label>Purchase Price<input id="purchasePrice" type="number" step="100" /></label>
+        <label>Rehab Budget<input id="rehabBudget" type="number" step="100" /></label>
+        <label>Estimated ARV<input id="arv" type="number" step="100" /></label>
+        <label>Status<select id="status"><option>New Lead</option><option>Reviewing</option><option>Submitted</option><option>Approved</option><option>Closing</option><option>Closed</option><option>Dead</option><option>Archived</option></select></label>
+        <label>Assigned Lender<select id="lender"><option value="">Select lender...</option></select></label>
+        <label>Final Funding Partner<select id="finalLender"><option value="">Not yet funded...</option></select></label>
+        <label>Next Follow-Up<input id="nextFollowUp" type="date" /></label>
+        <label>Target Closing<input id="targetClosing" type="date" /></label>
+        <label>Date Submitted<input id="dateSubmitted" type="date" /></label>
+        <label>Date Approved<input id="dateApproved" type="date" /></label>
+        <label>Date Funded<input id="dateFunded" type="date" /></label>
+        <label>Interest Rate<input id="interestRate" placeholder="Example: 11.50%" /><small>Used on the editable term sheet.</small></label>
+        <label>Origination Points<input id="points" placeholder="Example: 2.00" /></label>
+        <label>Loan Term<input id="loanTerm" placeholder="Example: 12 months" /></label>
+        <label>LTV / LTC<input id="leverage" placeholder="Example: 75% LTV / 90% LTC" /></label>
+        <label>Exit Strategy<input id="exitStrategy" placeholder="Sale, refinance, hold..." /></label>
+        <label>Term Sheet Expiration<input id="termExpiration" type="date" /></label>
+        <label class="wide">Term Sheet Conditions<textarea id="termConditions" rows="3" placeholder="Appraisal, title, insurance, entity documents, reserves..."></textarea></label>
+        <label class="wide">Decline Reason<textarea id="declineReason" rows="2" placeholder="Optional reason to include in the decline letter"></textarea></label>
+        <fieldset class="wide checklist-box"><legend>Document Checklist</legend><div id="documentChecklist" class="checklist-grid"></div></fieldset>
+        <fieldset class="wide file-vault"><legend>Client Document File</legend>
+          <p class="file-help" id="fileStorageHelp">Upload documents received by email, text, or any other method. When Google Drive is connected, files are placed in this loan’s Drive folder; otherwise the CRM uses local browser storage.</p>
+          <div class="drive-actions"><button type="button" id="createDriveFolderBtn">Choose Google Drive Folder</button><button type="button" id="openDriveFolderBtn">Prepare Client Folder</button><span id="driveStatus" class="drive-status">Storage folder not selected</span></div>
+          <div class="file-upload-row">
+            <select id="documentCategory" aria-label="Document category">
+              <option>Identity</option><option>Entity</option><option>Property</option><option>Financial</option><option>Insurance</option><option>Underwriting</option><option>Closing</option><option>Generated Documents</option><option>Other</option>
+            </select>
+            <label class="upload-doc-btn">+ Upload Document<input id="clientDocumentInput" type="file" multiple hidden /></label>
+          </div>
+          <div id="clientDocumentList" class="client-document-list"><div class="empty-docs">Save or open a loan to attach documents.</div></div>
+        </fieldset>
+        <label class="wide">Other Missing Documents / Needs List<textarea id="missingDocs" rows="3" placeholder="Add anything not listed above..."></textarea></label>
+        <label class="wide">Notes<textarea id="notes" rows="5"></textarea></label>
+      </div>
+      <div class="document-actions">
+        <span>Generate:</span>
+        <button type="button" id="termSheetBtn">Term Sheet</button>
+        <button type="button" id="needsListBtn">Needs List</button>
+        <button type="button" id="preapprovalBtn">Approval Letter</button>
+        <button type="button" id="declineBtn">Decline Letter</button>
+        <span class="action-divider"></span>
+        <button type="button" id="composeEmailBtn" class="email-action">Email Borrower</button>
+      </div>
+      <fieldset class="wide email-history-box">
+        <legend>Email Activity</legend>
+        <div id="emailActivityList" class="email-activity-list">
+          <div class="empty-docs">Save or open a loan to view email activity.</div>
+        </div>
+      </fieldset>
+      <div class="dialog-actions"><button type="button" id="deleteBtn" class="danger hidden">Delete</button><div class="spacer"></div><button type="button" id="addLoanTaskBtn">+ Task</button><button type="button" id="addLoanCalendarBtn">+ Calendar</button><button type="button" id="cancelDialogBtn">Cancel</button><button type="submit" class="primary">Save Loan</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="cloudSetupDialog">
+    <form method="dialog" id="cloudSetupForm" class="setup-wrap admin-settings">
+      <div class="dialog-header"><h2>BearCrest CRM Settings</h2><button type="button" id="closeCloudSetupBtn" class="close-btn">×</button></div>
+      <div class="settings-section"><h3>Company & Document Branding</h3><div class="settings-grid">
+        <label>Company Name<input id="adminCompanyName" value="BearCrest Funding, LLC" /></label>
+        <label>Representative Name<input id="adminRepresentative" value="Joel Vazquez" /></label>
+        <label>Telephone<input id="adminPhone" value="423-454-1956" /></label>
+        <label>Email<input id="adminEmail" value="getfunded@bearcrest.com" /></label>
+        <label>Document Subtitle<input id="adminSubtitle" value="Investment Real Estate Financing" /></label>
+        <label>Loan Number Prefix<input id="adminLoanPrefix" value="BCF" /></label>
+        <label>Next Loan Number<input id="adminNextLoanNumber" type="number" min="1" value="1001" /></label>
+      </div></div>
+      <div class="settings-section"><h3>Google Drive Connection</h3>
+        <p>Paste the Google Apps Script Web App URL after deploying the included <strong>BearCrest_Cloud_Connector.gs</strong> file.</p>
+        <label>Apps Script Web App URL<input id="cloudEndpoint" placeholder="https://script.google.com/macros/s/.../exec" /></label>
+        <label>Main Drive Folder Name<input id="adminRootFolder" value="BearCrest CRM Documents" /></label>
+        <div class="wide local-drive-setting"><strong>Google Drive for Desktop Storage</strong><p id="localDriveAdminStatus">No synchronized folder selected.</p><button type="button" id="chooseLocalDriveBtn">Choose Google Drive Folder</button> <button type="button" id="clearLocalDriveBtn">Disconnect Folder</button></div>
+      </div>
+      <div class="settings-section"><h3>Investor Application</h3><div class="settings-grid">
+        <label>Jotform Form ID<input id="jotformFormId" value="261954251577061" /></label>
+        <label>Application Link<input id="jotformUrl" value="https://form.jotform.com/261954251577061" /></label>
+      </div></div>
+      <div class="settings-section lender-management-section">
+        <div class="settings-heading-row">
+          <div>
+            <h3>Funding Partners & Lenders</h3>
+            <p>Add lenders once, then use them in the Assigned Lender and Final Funding Partner dropdowns.</p>
+          </div>
+          <button type="button" id="newLenderBtn">+ New Lender</button>
+        </div>
+
+        <div id="lenderSummary" class="lender-summary"></div>
+
+        <div id="lenderEditor" class="lender-editor hidden">
+          <input type="hidden" id="lenderEditId" />
+          <div class="settings-grid">
+            <label>Lender Name<input id="lenderName" placeholder="Example: Kiavi" /></label>
+            <label>Primary Contact<input id="lenderContactName" placeholder="Contact name" /></label>
+            <label>Email<input id="lenderEmail" type="email" placeholder="name@lender.com" /></label>
+            <label>Phone<input id="lenderPhone" placeholder="Phone number" /></label>
+            <label class="wide">Portal / Login Link<input id="lenderPortalUrl" type="url" placeholder="https://..." /></label>
+            <label class="wide">Programs, Guidelines & Notes<textarea id="lenderNotes" rows="4" placeholder="Programs, minimum FICO, leverage, states, turn times, exceptions, contact notes..."></textarea></label>
+          </div>
+          <div class="lender-editor-actions">
+            <button type="button" id="cancelLenderBtn">Cancel</button>
+            <button type="button" id="saveLenderBtn" class="primary">Save Lender</button>
+          </div>
+        </div>
+
+        <div id="lenderAdminStatus" class="lender-admin-status"></div>
+        <div id="lenderList" class="lender-list"></div>
+      </div>
+      <div class="settings-section"><h3>Google Email</h3><div class="settings-grid">
+        <label>Sender Display Name<input id="adminEmailSenderName" value="BearCrest Funding, LLC" /></label>
+        <label>Reply-To Email<input id="adminEmailReplyTo" type="email" value="getfunded@bearcrest.com" /></label>
+        <label class="wide">Default Email Signature<textarea id="adminEmailSignature" rows="4">Thank you,
+
+Joel Vazquez
+BearCrest Funding
+423-454-1956
+getfunded@bearcrest.com</textarea></label>
+      </div>
+      <p>Email is sent through the Google account that owns the Apps Script deployment. Google may request Gmail permission the first time this feature is used.</p></div>
+      <div class="settings-section"><h3>Phone & Desktop Sync</h3>
+  <p>Save the CRM database to Google Drive so this phone app and the desktop CRM can share the same loans, contacts, tasks, calendar events, and settings.</p>
+  <div class="settings-grid">
+    <label>Automatic Cloud Sync<select id="adminAutoCloudSync"><option value="on">On</option><option value="off">Off</option></select></label>
+    <label>Sync Interval<select id="adminCloudSyncMinutes"><option value="2">Every 2 minutes</option><option value="5" selected>Every 5 minutes</option><option value="10">Every 10 minutes</option><option value="30">Every 30 minutes</option></select></label>
+  </div>
+  <div class="dialog-actions">
+    <button type="button" id="downloadCloudDataBtn">Download Cloud Data</button>
+    <button type="button" id="uploadCloudDataBtn">Upload This Device</button>
+    <span id="cloudDatabaseStatus" class="drive-status">Not synced yet</span>
+  </div>
+</div>
+<div class="settings-section"><h3>Login & Security</h3><div class="settings-grid">
+        <label>Administrator Username<input id="adminLoginUsername" autocomplete="username" /></label>
+        <label>Session Timeout<select id="adminSessionTimeout"><option value="15">15 minutes</option><option value="30">30 minutes</option><option value="60">1 hour</option><option value="240">4 hours</option><option value="480">8 hours</option></select></label>
+        <label>New Password<input id="adminNewPassword" type="password" autocomplete="new-password" placeholder="Leave blank to keep current password" /></label>
+        <label>Confirm New Password<input id="adminConfirmPassword" type="password" autocomplete="new-password" /></label>
+      </div><p class="security-help">Use at least 10 characters. For a hosted version, this temporary browser login should be replaced with server-based authentication and optional two-step verification.</p></div>
+      <div class="setup-note">These settings are saved in this browser. Company information automatically appears on generated documents. The loan prefix and next number control newly created loans. Your Jotform API key remains stored only in Google Apps Script Script Properties.</div>
+      <div class="dialog-actions"><button type="button" id="resetAdminBtn">Restore Defaults</button><div class="spacer"></div><button type="button" id="testCloudBtn">Test Drive Connection</button><button type="submit" class="primary">Save Admin Settings</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="emailDialog">
+    <form id="emailForm" class="setup-wrap email-compose-wrap">
+      <div class="dialog-header"><h2>Email Borrower</h2><button type="button" id="closeEmailDialogBtn" class="close-btn" aria-label="Close">×</button></div>
+      <div class="email-loan-context" id="emailLoanContext"></div>
+      <div class="settings-grid">
+        <label>Template<select id="emailTemplate">
+          <option value="general">General Message</option>
+          <option value="received">Application Received</option>
+          <option value="needs">Needs List / Missing Items</option>
+          <option value="preapproval">Pre-Approval</option>
+          <option value="conditions">Conditions / Additional Information</option>
+          <option value="termSheet">Term Sheet Ready</option>
+          <option value="closing">Closing / Congratulations</option>
+          <option value="decline">Decline</option>
+        </select></label>
+        <label>To<input id="emailTo" type="email" required /></label>
+        <label>CC<input id="emailCc" type="text" placeholder="Optional; separate multiple emails with commas" /></label>
+        <label>BCC<input id="emailBcc" type="text" placeholder="Optional" /></label>
+        <label class="wide">Subject<input id="emailSubject" required /></label>
+        <label class="wide">Message<textarea id="emailBody" rows="13" required></textarea></label>
+        <label class="wide email-option"><input id="includeDriveLink" type="checkbox" /> Include the loan's Google Drive folder link</label>
+      </div>
+
+      <fieldset class="email-attachments-box">
+        <legend>Attachments</legend>
+        <div class="attachment-actions">
+          <button type="button" id="loadLoanFilesBtn">Choose From Loan Files</button>
+          <label class="attachment-upload-btn">Upload From Computer<input id="emailAttachmentInput" type="file" multiple hidden /></label>
+        </div>
+        <div id="loanAttachmentPicker" class="loan-attachment-picker hidden"></div>
+        <div id="selectedAttachments" class="selected-attachments">
+          <div class="empty-docs">No attachments selected.</div>
+        </div>
+      </fieldset>
+
+      <div id="emailSendStatus" class="email-send-status"></div>
+      <div class="dialog-actions">
+        <button type="button" id="openGmailBtn">Open in Gmail</button>
+        <div class="spacer"></div>
+        <button type="button" id="cancelEmailBtn">Cancel</button>
+        <button type="submit" id="sendEmailBtn" class="primary">Send Email</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="taskDialog">
+    <form id="taskForm" class="setup-wrap operations-dialog">
+      <div class="dialog-header"><h2 id="taskDialogTitle">New Task</h2><button type="button" id="closeTaskDialogBtn" class="close-btn">×</button></div>
+      <input type="hidden" id="taskId" />
+      <div class="settings-grid">
+        <label class="wide">Task<input id="taskTitle" required placeholder="Example: Call borrower for bank statements" /></label>
+        <label>Due Date<input id="taskDueDate" type="date" required /></label>
+        <label>Priority<select id="taskPriority"><option>High</option><option selected>Medium</option><option>Low</option></select></label>
+        <label>Assigned To<input id="taskAssignedTo" value="Joel Vazquez" /></label>
+        <label>Loan<select id="taskLoanId"><option value="">General / No Loan</option></select></label>
+        <label>Category<select id="taskCategory"><option>Follow-Up</option><option>Documents</option><option>Submission</option><option>Underwriting</option><option>Closing</option><option>Call</option><option>Email</option><option>Other</option></select></label>
+        <label>Status<select id="taskStatus"><option>Open</option><option>In Progress</option><option>Completed</option></select></label>
+        <label class="wide">Notes<textarea id="taskNotes" rows="4"></textarea></label>
+        <label class="wide email-option"><input id="taskAddToCalendar" type="checkbox" /> Also show this task on the CRM calendar</label>
+      </div>
+      <div class="dialog-actions"><button type="button" id="deleteTaskBtn" class="danger hidden">Delete</button><div class="spacer"></div><button type="button" id="cancelTaskBtn">Cancel</button><button type="submit" class="primary">Save Task</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="calendarEventDialog">
+    <form id="calendarEventForm" class="setup-wrap operations-dialog">
+      <div class="dialog-header"><h2 id="calendarEventDialogTitle">New Calendar Event</h2><button type="button" id="closeCalendarEventBtn" class="close-btn">×</button></div>
+      <input type="hidden" id="calendarEventId" />
+      <div class="settings-grid">
+        <label class="wide">Event Title<input id="calendarEventTitle" required /></label>
+        <label>Date<input id="calendarEventDate" type="date" required /></label>
+        <label>Time<input id="calendarEventTime" type="time" value="09:00" /></label>
+        <label>Event Type<select id="calendarEventType"><option>Follow-Up</option><option>Closing</option><option>Inspection</option><option>Borrower Call</option><option>Document Deadline</option><option>Other</option></select></label>
+        <label>Loan<select id="calendarEventLoanId"><option value="">General / No Loan</option></select></label>
+        <label class="wide">Notes<textarea id="calendarEventNotes" rows="4"></textarea></label>
+        <label class="wide email-option"><input id="calendarGoogleSync" type="checkbox" /> Add this event to Google Calendar</label>
+      </div>
+      <div class="dialog-actions"><button type="button" id="deleteCalendarEventBtn" class="danger hidden">Delete</button><div class="spacer"></div><button type="button" id="cancelCalendarEventBtn">Cancel</button><button type="submit" class="primary">Save Event</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="contactDialog">
+    <form id="contactForm" class="setup-wrap operations-dialog">
+      <div class="dialog-header"><h2 id="contactDialogTitle">New Contact</h2><button type="button" id="closeContactDialogBtn" class="close-btn">×</button></div>
+      <input type="hidden" id="contactId" />
+      <div class="settings-grid">
+        <label>First Name<input id="contactFirstName" required /></label>
+        <label>Last Name<input id="contactLastName" /></label>
+        <label>Contact Type<select id="contactType"><option>Borrower</option><option>Broker</option><option>Realtor</option><option>Title Company</option><option>Insurance Agent</option><option>Attorney</option><option>Lender</option><option>Contractor</option><option>Other</option></select></label>
+        <label>Company<input id="contactCompany" /></label>
+        <label>Email<input id="contactEmail" type="email" /></label>
+        <label>Phone<input id="contactPhone" /></label>
+        <label>Secondary Phone<input id="contactPhone2" /></label>
+        <label>Website<input id="contactWebsite" type="url" /></label>
+        <label class="wide">Address<input id="contactAddress" /></label>
+        <label>City<input id="contactCity" /></label>
+        <label>State<input id="contactState" /></label>
+        <label>ZIP<input id="contactZip" /></label>
+        <label>Related Loan<select id="contactLoanId"><option value="">No Related Loan</option></select></label>
+        <label class="wide">Notes<textarea id="contactNotes" rows="4"></textarea></label>
+      </div>
+      <div class="dialog-actions"><button type="button" id="deleteContactBtn" class="danger hidden">Delete</button><div class="spacer"></div><button type="button" id="cancelContactBtn">Cancel</button><button type="submit" class="primary">Save Contact</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="libraryUploadDialog">
+    <form id="libraryUploadForm" class="setup-wrap operations-dialog">
+      <div class="dialog-header"><h2>Upload to Document Library</h2><button type="button" id="closeLibraryUploadBtn" class="close-btn">×</button></div>
+      <div class="settings-grid">
+        <label class="wide">Selected Files<div id="librarySelectedFiles" class="selected-library-files"></div></label>
+        <label>Category<select id="libraryUploadCategory"><option>Applications</option><option>Needs Lists</option><option>Pre-Approvals</option><option>Decline Letters</option><option>Rehab Budgets</option><option>Track Records</option><option>Experience Forms</option><option>Entity Documents</option><option>Loan Guidelines</option><option>Marketing</option><option>Other</option></select></label>
+        <label>Description<input id="libraryUploadDescription" placeholder="Optional description" /></label>
+      </div>
+      <div class="dialog-actions"><div class="spacer"></div><button type="button" id="cancelLibraryUploadBtn">Cancel</button><button type="submit" class="primary">Upload Files</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="passwordChangeDialog">
+    <form id="passwordChangeForm" class="setup-wrap password-change-wrap">
+      <div class="dialog-header"><h2>Create Your Private Password</h2></div>
+      <p>This is the first login. Replace the temporary password before continuing.</p>
+      <label>New Password<input id="firstNewPassword" type="password" autocomplete="new-password" required /></label>
+      <label>Confirm New Password<input id="firstConfirmPassword" type="password" autocomplete="new-password" required /></label>
+      <div id="passwordChangeError" class="login-error"></div>
+      <div class="dialog-actions"><div class="spacer"></div><button type="submit" class="primary">Save Password</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="followupDialog">
+    <div class="followup-wrap"><div class="dialog-header"><h2>Today's Follow-Ups</h2><button type="button" id="closeFollowupBtn" class="close-btn">×</button></div><div id="followupList"></div></div>
+  </dialog>
+
+
+  <script src="app.js"></script>
+  <script src="auth.js"></script>
+
+
+  <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+    <button class="active" data-mobile-nav="mobilehome"><b>⌂</b><span>Home</span></button>
+    <button data-mobile-nav="pipeline"><b>▦</b><span>Pipeline</span></button>
+    <button id="mobileBottomAdd" class="mobile-bottom-add" aria-label="New loan"><b>＋</b></button>
+    <button data-mobile-nav="tasks"><b>☑</b><span>Tasks</span></button>
+    <button data-mobile-nav="contacts"><b>♙</b><span>Contacts</span></button>
+  </nav>
+
+  <dialog id="mobileLoanPickerDialog" class="mobile-picker-dialog">
+    <div class="mobile-picker-head"><div><small>FIELD MODE</small><h3 id="mobilePickerTitle">Choose a loan</h3></div><button id="closeMobilePicker" type="button">×</button></div>
+    <input id="mobilePickerSearch" placeholder="Search borrower or property..." />
+    <div id="mobilePickerList" class="mobile-picker-list"></div>
+  </dialog>
+  <script>
+  if ("serviceWorker" in navigator && location.protocol !== "file:") {
+    window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js").catch(console.error));
+  }
+  </script>
+</body>
+</html>
