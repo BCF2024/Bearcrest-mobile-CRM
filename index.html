@@ -1,1 +1,168 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#173f35"><title>BearCrest CRM</title><link rel="manifest" href="manifest.json"><link rel="stylesheet" href="styles.css"></head><body><header><div class="brand"><b>BCF</b><span>BearCrest CRM<small>Desktop + Mobile</small></span></div><div class="head-actions"><button id="exportBtn">Export</button><label>Import<input id="importInput" type="file" accept=".json" hidden></label><button id="settingsBtn">Settings</button></div></header><nav class="desktop-nav"><button data-view="dashboard" class="active">Dashboard</button><button data-view="pipeline">Pipeline</button><button data-view="followups">Follow-Ups</button><button data-view="contacts">Contacts</button></nav><main><section id="dashboardView" class="view active"><div class="hero"><div><em>BEARCREST FUNDING</em><h1>One CRM. Every screen.</h1><p>Use the same system on your computer, tablet, or phone.</p></div><button id="newLoanHero" class="primary">+ New Loan</button></div><div id="stats" class="stats"></div><div class="twocol"><article><div class="title"><h2>Today's Follow-Ups</h2><button data-view="followups">View all</button></div><div id="todayList"></div></article><article><div class="title"><h2>Recent Loans</h2><button data-view="pipeline">Pipeline</button></div><div id="recentList"></div></article></div></section><section id="pipelineView" class="view"><div class="section-title"><div><em>PIPELINE</em><h1>Loans</h1></div><button id="newLoanBtn" class="primary">+ New Loan</button></div><div class="filters"><input id="searchInput" placeholder="Search borrower, property, lender or loan #"><select id="statusFilter"><option value="">All statuses</option><option>New Lead</option><option>Reviewing</option><option>Submitted</option><option>Approved</option><option>Closing</option><option>Closed</option><option>Dead</option></select></div><div class="tablebox"><table><thead><tr><th>Loan</th><th>Borrower</th><th>Program</th><th>Property</th><th>Status</th><th>Amount</th><th>Follow-Up</th><th></th></tr></thead><tbody id="loanRows"></tbody></table></div><div id="mobileCards" class="cards"></div></section><section id="followupsView" class="view"><div class="section-title"><div><em>FOLLOW-UPS</em><h1>What needs attention</h1></div></div><div id="followupList" class="stack"></div></section><section id="contactsView" class="view"><div class="section-title"><div><em>CONTACTS</em><h1>Borrowers</h1></div></div><div id="contactList" class="stack"></div></section></main><button id="mobileAdd" class="fab">+</button><nav class="mobile-nav"><button data-view="dashboard" class="active">⌂<small>Home</small></button><button data-view="pipeline">▦<small>Loans</small></button><button data-view="followups">✓<small>Tasks</small></button><button data-view="contacts">♙<small>Contacts</small></button></nav><dialog id="loanDialog"><form id="loanForm"><div class="dialog-title"><div><em>LOAN FILE</em><h2 id="dialogTitle">New Loan</h2></div><button type="button" id="closeDialog">×</button></div><input type="hidden" id="loanId"><div class="formgrid"><label>Loan Number<input id="loanNumber" required></label><label>Date Received<input id="dateReceived" type="date"></label><label>Borrower Name<input id="borrowerName" required></label><label>Entity<input id="entityName"></label><label>Phone<input id="phone"></label><label>Email<input id="email" type="email"></label><label>Program<select id="program"><option>Fix & Flip</option><option>BCF 100</option><option>DSCR</option><option>Ground-Up Construction</option><option>Bridge</option><option>Multifamily</option><option>Transactional Funding</option><option>Other</option></select></label><label>Status<select id="status"><option>New Lead</option><option>Reviewing</option><option>Submitted</option><option>Approved</option><option>Closing</option><option>Closed</option><option>Dead</option></select></label><label class="wide">Property Address<input id="propertyAddress"></label><label>Loan Amount<input id="loanAmount" type="number"></label><label>Purchase Price<input id="purchasePrice" type="number"></label><label>Rehab Budget<input id="rehabBudget" type="number"></label><label>ARV / Value<input id="arv" type="number"></label><label>Assigned Lender<input id="lender"></label><label>Next Follow-Up<input id="nextFollowUp" type="date"></label><label>Target Closing<input id="targetClosing" type="date"></label><label class="wide">Missing Items<textarea id="missingDocs" rows="3"></textarea></label><label class="wide">Notes<textarea id="notes" rows="5"></textarea></label></div><div id="phoneActions" class="phone-actions"><a id="callLink">Call</a><a id="textLink">Text</a><a id="emailLink">Email</a><a id="mapLink" target="_blank">Directions</a></div><div class="dialog-actions"><button type="button" id="deleteBtn" class="danger">Delete</button><span></span><button type="button" id="cancelBtn">Cancel</button><button class="primary">Save Loan</button></div></form></dialog><dialog id="settingsDialog"><form id="settingsForm"><div class="dialog-title"><div><em>SETTINGS</em><h2>BearCrest CRM</h2></div><button type="button" id="closeSettings">×</button></div><div class="formgrid"><label>Company Name<input id="companyName"></label><label>Representative<input id="representative"></label><label>Phone<input id="companyPhone"></label><label>Email<input id="companyEmail"></label><label>Loan Prefix<input id="loanPrefix"></label><label>Next Loan Number<input id="nextLoanNumber" type="number"></label></div><p class="notice">This version is responsive on every device. It currently stores records in each browser. Live cross-device data requires the shared cloud connector.</p><div class="dialog-actions"><span></span><span></span><button type="button" id="closeSettings2">Cancel</button><button class="primary">Save</button></div></form></dialog><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#173f35">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>BearCrest CRM V8</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="mark">BCF</div>
+    <div><strong>BearCrest CRM</strong><small>Version 8 · Google Cloud Sync</small></div>
+  </div>
+  <div class="top-actions">
+    <span id="syncStatus" class="sync-status">Connecting…</span>
+    <button id="refreshBtn">Refresh</button>
+    <button id="settingsBtn">Settings</button>
+  </div>
+</header>
+
+<nav class="desktop-nav">
+  <button data-view="dashboard" class="active">Dashboard</button>
+  <button data-view="pipeline">Pipeline</button>
+  <button data-view="applications">Applications</button>
+  <button data-view="followups">Follow-Ups</button>
+  <button data-view="contacts">Contacts</button>
+</nav>
+
+<main>
+  <section id="dashboardView" class="view active">
+    <div class="hero">
+      <div>
+        <p class="eyebrow">BEARCREST FUNDING</p>
+        <h1>Good afternoon, Joel.</h1>
+        <p>One shared CRM for your desktop and Fold, powered by Google Sheets and Drive.</p>
+      </div>
+      <button id="newLoanHero" class="primary">+ New Loan</button>
+    </div>
+    <div id="stats" class="stats"></div>
+    <div class="grid2">
+      <section class="card">
+        <div class="cardhead"><h2>Today's Follow-Ups</h2><button data-view="followups">View all</button></div>
+        <div id="todayList"></div>
+      </section>
+      <section class="card">
+        <div class="cardhead"><h2>Recent Loans</h2><button data-view="pipeline">Pipeline</button></div>
+        <div id="recentList"></div>
+      </section>
+    </div>
+  </section>
+
+  <section id="pipelineView" class="view">
+    <div class="sectionhead">
+      <div><p class="eyebrow">PIPELINE</p><h1>Loans</h1></div>
+      <button id="newLoanBtn" class="primary">+ New Loan</button>
+    </div>
+    <div class="filters">
+      <input id="searchInput" placeholder="Search borrower, property, lender or loan #">
+      <select id="statusFilter">
+        <option value="">All statuses</option><option>New Lead</option><option>Reviewing</option>
+        <option>Submitted</option><option>Approved</option><option>Closing</option>
+        <option>Closed</option><option>Dead</option>
+      </select>
+    </div>
+    <div class="table-card">
+      <table>
+        <thead><tr><th>Loan</th><th>Borrower</th><th>Program</th><th>Property</th><th>Status</th><th>Amount</th><th>Follow-Up</th><th></th></tr></thead>
+        <tbody id="loanRows"></tbody>
+      </table>
+    </div>
+    <div id="mobileCards" class="mobile-cards"></div>
+  </section>
+
+  <section id="applicationsView" class="view">
+    <div class="sectionhead">
+      <div><p class="eyebrow">APPLICATIONS</p><h1>New submissions</h1></div>
+      <button id="syncAppsBtn" class="primary">Sync Applications</button>
+    </div>
+    <p class="notice">Applications are read from the Google Sheet tab named <strong>Applications</strong>. Imported submissions are marked so they are not duplicated.</p>
+    <div id="applicationList" class="stack"></div>
+  </section>
+
+  <section id="followupsView" class="view">
+    <div class="sectionhead"><div><p class="eyebrow">FOLLOW-UPS</p><h1>What needs attention</h1></div></div>
+    <div id="followupList" class="stack"></div>
+  </section>
+
+  <section id="contactsView" class="view">
+    <div class="sectionhead"><div><p class="eyebrow">CONTACTS</p><h1>Borrowers</h1></div></div>
+    <div id="contactList" class="stack"></div>
+  </section>
+</main>
+
+<button id="mobileAdd" class="fab" aria-label="Add loan">+</button>
+<nav class="mobile-nav">
+  <button data-view="dashboard" class="active"><span>⌂</span>Home</button>
+  <button data-view="pipeline"><span>▦</span>Loans</button>
+  <button data-view="applications"><span>⇩</span>Apps</button>
+  <button data-view="followups"><span>✓</span>Tasks</button>
+  <button data-view="contacts"><span>♙</span>Contacts</button>
+</nav>
+
+<dialog id="loanDialog">
+<form id="loanForm">
+  <div class="dialoghead">
+    <div><p class="eyebrow">LOAN FILE</p><h2 id="dialogTitle">New Loan</h2></div>
+    <button type="button" id="closeDialog">×</button>
+  </div>
+  <input type="hidden" id="recordId">
+  <div class="formgrid">
+    <label>Loan Number<input id="loanNumber" required></label>
+    <label>Date Received<input id="dateReceived" type="date"></label>
+    <label>Borrower Name<input id="borrowerName" required></label>
+    <label>Entity<input id="entityName"></label>
+    <label>Phone<input id="phone" inputmode="tel"></label>
+    <label>Email<input id="email" type="email"></label>
+    <label>Program<select id="program">
+      <option>Fix & Flip</option><option>BCF 100</option><option>DSCR</option>
+      <option>Ground-Up Construction</option><option>Bridge</option>
+      <option>Multifamily</option><option>Transactional Funding</option><option>Other</option>
+    </select></label>
+    <label>Status<select id="status">
+      <option>New Lead</option><option>Reviewing</option><option>Submitted</option>
+      <option>Approved</option><option>Closing</option><option>Closed</option><option>Dead</option>
+    </select></label>
+    <label class="wide">Property Address<input id="propertyAddress"></label>
+    <label>Loan Amount<input id="loanAmount" type="number" step="100"></label>
+    <label>Purchase Price<input id="purchasePrice" type="number" step="100"></label>
+    <label>Rehab Budget<input id="rehabBudget" type="number" step="100"></label>
+    <label>ARV / Value<input id="arv" type="number" step="100"></label>
+    <label>Assigned Lender<input id="lender"></label>
+    <label>Next Follow-Up<input id="nextFollowUp" type="date"></label>
+    <label>Target Closing<input id="targetClosing" type="date"></label>
+    <label class="wide">Missing Items<textarea id="missingDocs" rows="3"></textarea></label>
+    <label class="wide">Notes<textarea id="notes" rows="5"></textarea></label>
+  </div>
+
+  <section class="documents">
+    <div class="cardhead"><h3>Loan Documents</h3><label class="buttonlike dark">Upload<input id="documentInput" type="file" multiple hidden></label></div>
+    <div id="documentList"></div>
+  </section>
+
+  <div class="phone-actions">
+    <a id="callLink">Call</a><a id="textLink">Text</a><a id="emailLink">Email</a><a id="mapLink" target="_blank">Directions</a>
+  </div>
+
+  <div class="dialogactions">
+    <button type="button" id="deleteBtn" class="danger">Delete</button><span></span>
+    <button type="button" id="cancelBtn">Cancel</button><button class="primary" type="submit">Save Loan</button>
+  </div>
+</form>
+</dialog>
+
+<dialog id="settingsDialog">
+<form id="settingsForm">
+  <div class="dialoghead"><div><p class="eyebrow">CONNECTION</p><h2>Google Apps Script</h2></div><button type="button" id="closeSettings">×</button></div>
+  <label class="single">Web App URL<input id="webAppUrl" placeholder="https://script.google.com/macros/s/.../exec"></label>
+  <p class="notice">Paste the deployed Google Apps Script Web App URL here. It is saved only in this browser.</p>
+  <div class="dialogactions"><span></span><span></span><button type="button" id="closeSettings2">Cancel</button><button class="primary" type="submit">Save Connection</button></div>
+</form>
+</dialog>
+
+<script src="app.js"></script>
+</body></html>
