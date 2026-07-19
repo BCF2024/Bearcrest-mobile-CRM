@@ -2,13 +2,25 @@
 const $=id=>document.getElementById(id);
 const CFG_KEY="bearcrest_v8_config";
 let config=JSON.parse(localStorage.getItem(CFG_KEY)||'{"webAppUrl":""}');
-let loans=[], applications=[], currentDocuments=[];
+let loans=[], applications=[], lenders=[], currentDocuments=[];
 const today=()=>new Date().toISOString().slice(0,10);
 const money=v=>v?new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(Number(v)):"";
 const esc=s=>String(s??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
 const fields=["recordId","loanNumber","dateReceived","borrowerName","entityName","phone","email","program","propertyAddress","loanAmount","purchasePrice","rehabBudget","arv","status","lender","nextFollowUp","targetClosing","missingDocs","notes"];
 
 function setSync(text,good=false){$("syncStatus").textContent=text;$("syncStatus").style.color=good?"#c9f2dc":"#f4dfad"}
+function renderLenderOptions(selected=""){
+ const select=$("lender");
+ if(!select) return;
+ const current=selected || select.value || "";
+ const names=[...new Set((lenders||[]).map(x=>typeof x==="string"?x:(x.name||x.lenderName||"")).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+ select.innerHTML='<option value="">Select a lender…</option>'+names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("")+'<option value="__OTHER__">Other / Add New</option>';
+ if(current && names.includes(current)) select.value=current;
+ else if(current){
+   const opt=document.createElement("option");opt.value=current;opt.textContent=current;select.insertBefore(opt,select.lastElementChild);select.value=current;
+ }
+}
+
 function requireUrl(){if(!config.webAppUrl){openSettings();throw new Error("Connection required")}}
 async function api(action,payload={}){
   requireUrl(); setSync("Syncing…");
@@ -29,7 +41,8 @@ document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>setView(b.data
 async function loadAll(){
  try{
   const data=await api("getAll");
-  loans=data.loans||[]; applications=data.applications||[];
+  loans=data.loans||[]; applications=data.applications||[]; lenders=data.lenders||[];
+  renderLenderOptions();
   renderAll();
  }catch(e){setSync("Not connected"); if(config.webAppUrl) alert(e.message)}
 }
@@ -81,13 +94,18 @@ function renderDocuments(){
  $("documentList").innerHTML=currentDocuments.map(d=>`<div class="doc"><a href="${esc(d.url)}" target="_blank">${esc(d.name)}</a><button type="button" onclick="deleteDocument('${esc(d.fileId)}')">Remove</button></div>`).join("")||"<p>No documents uploaded yet.</p>";
 }
 async function openNew(prefill={}){
- $("loanForm").reset();$("recordId").value="";$("dialogTitle").textContent="New Loan";$("dateReceived").value=today();$("program").value=prefill.program||"Fix & Flip";$("status").value="New Lead";
+ loanSaveInProgress=false;
+ if($("saveLoanBtn")){$("saveLoanBtn").disabled=false;$("saveLoanBtn").textContent="Save Loan";}
+ $("loanForm").reset();renderLenderOptions();$("recordId").value="";$("dialogTitle").textContent="New Loan";$("dateReceived").value=today();$("program").value=prefill.program||"Fix & Flip";$("status").value="New Lead";
  Object.entries(prefill).forEach(([k,v])=>$(k)&&($(k).value=v||""));
  $("loanNumber").value=prefill.loanNumber||await api("getNextLoanNumber");
  $("deleteBtn").style.visibility="hidden";currentDocuments=[];renderDocuments();updateLinks(prefill);$("loanDialog").showModal();
 }
 window.openLoan=async id=>{
+ loanSaveInProgress=false;
+ if($("saveLoanBtn")){$("saveLoanBtn").disabled=false;$("saveLoanBtn").textContent="Save Loan";}
  const l=loans.find(x=>x.recordId===id);if(!l)return;
+ renderLenderOptions(l.lender||"");
  fields.forEach(f=>$(f).value=l[f]||"");$("dialogTitle").textContent=l.loanNumber||"Loan";$("deleteBtn").style.visibility="visible";updateLinks(l);
  currentDocuments=await api("getDocuments",{recordId:id});renderDocuments();$("loanDialog").showModal();
 }
@@ -101,16 +119,30 @@ window.deleteDocument=async fileId=>{
  if(!confirm("Remove this document?"))return;
  await api("deleteDocument",{fileId}); currentDocuments=currentDocuments.filter(d=>d.fileId!==fileId);renderDocuments();
 }
+let loanSaveInProgress=false;
 $("loanForm").onsubmit=async e=>{
  e.preventDefault();
+ if(loanSaveInProgress) return;
+ loanSaveInProgress=true;
+ const saveBtn=$("saveLoanBtn");
+ const originalText=saveBtn.textContent;
+ saveBtn.disabled=true;
+ saveBtn.textContent="Saving…";
  const data={};fields.forEach(f=>data[f]=$(f).value);
  const applicationId=$("loanDialog").dataset.applicationId||"";
  try{
   const saved=await api("saveLoan",{loan:data,applicationId});
+  $("recordId").value=saved.recordId||$("recordId").value;
   delete $("loanDialog").dataset.applicationId;
   $("loanDialog").close();
   await loadAll();
- }catch(err){alert(err.message)}
+ }catch(err){
+  alert(err.message);
+ }finally{
+  loanSaveInProgress=false;
+  saveBtn.disabled=false;
+  saveBtn.textContent=originalText;
+ }
 }
 $("deleteBtn").onclick=async()=>{const id=$("recordId").value;if(id&&confirm("Delete this loan?")){await api("deleteLoan",{recordId:id});$("loanDialog").close();await loadAll()}}
 $("closeDialog").onclick=$("cancelBtn").onclick=()=>{$("loanDialog").close();delete $("loanDialog").dataset.applicationId}
@@ -135,3 +167,15 @@ $("closeSettings").onclick=$("closeSettings2").onclick=()=>$("settingsDialog").c
 if("serviceWorker" in navigator)navigator.serviceWorker.register("./service-worker.js");
 renderAll();
 if(config.webAppUrl)loadAll();else{setSync("Connection needed");setTimeout(openSettings,300)}
+
+$("lender").onchange=()=>{
+ if($("lender").value==="__OTHER__"){
+   const name=prompt("Enter the lender name:");
+   if(name){
+     lenders.push({name});
+     renderLenderOptions(name.trim());
+   }else{
+     $("lender").value="";
+   }
+ }
+};

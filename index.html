@@ -7,12 +7,14 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>BearCrest CRM V8</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <header class="topbar">
   <div class="brand">
-    <div class="mark">BCF</div>
+    <img class="brand-logo" src="icon-192.png" alt="BearCrest Funding logo">
     <div><strong>BearCrest CRM</strong><small>Version 8 · Google Cloud Sync</small></div>
   </div>
   <div class="top-actions">
@@ -132,7 +134,9 @@
     <label>Purchase Price<input id="purchasePrice" type="number" step="100"></label>
     <label>Rehab Budget<input id="rehabBudget" type="number" step="100"></label>
     <label>ARV / Value<input id="arv" type="number" step="100"></label>
-    <label>Assigned Lender<input id="lender"></label>
+    <label>Assigned Lender
+      <select id="lender"><option value="">Select a lender…</option></select>
+    </label>
     <label>Next Follow-Up<input id="nextFollowUp" type="date"></label>
     <label>Target Closing<input id="targetClosing" type="date"></label>
     <label class="wide">Missing Items<textarea id="missingDocs" rows="3"></textarea></label>
@@ -150,7 +154,7 @@
 
   <div class="dialogactions">
     <button type="button" id="deleteBtn" class="danger">Delete</button><span></span>
-    <button type="button" id="cancelBtn">Cancel</button><button class="primary" type="submit">Save Loan</button>
+    <button type="button" id="cancelBtn">Cancel</button><button id="saveLoanBtn" class="primary" type="submit">Save Loan</button>
   </div>
 </form>
 </dialog>

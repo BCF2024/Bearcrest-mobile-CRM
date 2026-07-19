@@ -1,0 +1,20 @@
+BEARCREST CRM VERSION 8.1 — FIXES
+
+• Restored larger boxed Call, Text, Email, and Directions buttons.
+• Improved the four mobile quick-action boxes.
+• Prevented duplicate loans from accidental double-clicking:
+  - Save disables immediately
+  - Shows “Saving…”
+  - Ignores extra clicks until complete
+
+UPLOAD TO GITHUB
+Replace these website files:
+index.html
+styles.css
+app.js
+manifest.json
+service-worker.js
+icon-192.svg
+icon-512.svg
+
+No Google Apps Script redeployment is required for these fixes.

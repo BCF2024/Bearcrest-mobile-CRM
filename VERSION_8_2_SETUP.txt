@@ -1,0 +1,45 @@
+BEARCREST CRM VERSION 8.2
+
+WHAT CHANGED
+• Professional BearCrest app icon created from your official BCF logo.
+• New favicon and Apple touch icon.
+• BearCrest logo now appears in the CRM header.
+• Assigned Lender is now a dropdown on desktop and mobile.
+• Lender options load from a Google Sheet tab named Lenders.
+• A starter lender list is created during setup.
+• Version 8.1 fixes remain included:
+  - Larger Call, Text, Email, and Directions boxes
+  - Double-save protection
+
+IMPORTANT GOOGLE SCRIPT STEP
+Because Version 8.2 adds the Lenders tab, replace the existing Apps Script code
+with Google_Apps_Script_Code.gs from this package.
+
+Then:
+1. Reinsert your Google Sheet ID and Drive Folder ID at the top.
+2. Save.
+3. Run setupBearCrestCRM() once.
+4. Deploy > Manage deployments > Edit.
+5. Choose New version and Deploy.
+6. The Web App URL should remain the same.
+
+GITHUB FILES
+Replace the website files in the same GitHub repository:
+index.html
+styles.css
+app.js
+manifest.json
+service-worker.js
+icon-192.png
+icon-512.png
+icon-1024.png
+favicon-32.png
+favicon-48.png
+apple-touch-icon.png
+
+PHONE
+After GitHub Pages updates:
+1. Remove the old installed CRM icon from the phone.
+2. Open the same GitHub Pages URL in the browser.
+3. Refresh once.
+4. Add to Home Screen again.
