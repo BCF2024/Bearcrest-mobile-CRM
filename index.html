@@ -5,17 +5,17 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#173f35">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>BearCrest CRM V8.2</title>
+  <title>BearCrest CRM V8.3</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=83-final">
 </head>
 <body>
 <header class="topbar">
   <div class="brand">
     <img class="brand-logo" src="icon-192.png" alt="BearCrest Funding logo">
-    <div><strong>BearCrest CRM</strong><small>Version 8.2 · Google Cloud Sync</small></div>
+    <div><strong>BearCrest CRM</strong><small>Version 8.3 · Google Cloud Sync</small></div>
   </div>
   <div class="top-actions">
     <span id="syncStatus" class="sync-status">Connecting…</span>
@@ -37,7 +37,7 @@
     <div class="hero">
       <div>
         <p class="eyebrow">BEARCREST FUNDING</p>
-        <h1>Good afternoon, Joel.</h1>
+        <h1 id="dashboardGreeting">Good morning, Joel.</h1>
         <p>One shared CRM for your desktop and Fold, powered by Google Sheets and Drive.</p>
       </div>
       <button id="newLoanHero" class="primary">+ New Loan</button>
@@ -149,7 +149,10 @@
   </section>
 
   <div class="phone-actions">
-    <a id="callLink">CALL</a><a id="textLink">TEXT</a><a id="emailLink">EMAIL</a><a id="mapLink" target="_blank">DIRECTIONS</a>
+    <a id="callLink" class="action-button" aria-label="Call borrower"><svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.7 3.3 3.3 4.9 6.6 6.6l2.2-2.2c.3-.3.7-.4 1.1-.3 1.2.4 2.5.6 3.8.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.8 21 3 13.2 3 3.7c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.6.6 3.8.1.4 0 .8-.3 1.1z"/></svg><span>CALL</span></a>
+    <a id="textLink" class="action-button" aria-label="Text borrower"><svg viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg><span>TEXT</span></a>
+    <a id="emailLink" class="action-button" aria-label="Email borrower"><svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5z"/></svg><span>EMAIL</span></a>
+    <a id="mapLink" class="action-button" target="_blank" rel="noopener" aria-label="Directions to property"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg><span>DIRECTIONS</span></a>
   </div>
 
   <div class="dialogactions">
@@ -165,7 +168,8 @@
   <div class="settings-body">
     <section class="settings-section">
       <h3>Google Apps Script Connection</h3>
-      <label class="single">Web App URL<input id="webAppUrl" placeholder="https://script.google.com/macros/s/.../exec"></label>
+      <div class="connection-row"><label class="single">Web App URL<input id="webAppUrl" placeholder="https://script.google.com/macros/s/.../exec"></label><button type="button" id="testConnectionBtn" class="primary">Test Connection</button></div>
+      <p id="connectionResult" class="connection-result"></p>
       <p class="notice">Paste the deployed Google Apps Script Web App URL here. It is saved only in this browser.</p>
     </section>
     <section class="settings-section lender-manager">
@@ -179,5 +183,5 @@
 </form>
 </dialog>
 
-<script src="app.js"></script>
+<script src="app.js?v=83-final"></script>
 </body></html>

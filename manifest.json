@@ -1,10 +1,10 @@
 {
-  "name": "BearCrest CRM V8.2",
-  "short_name": "BearCrest CRM",
+  "name": "BearCrest CRM Version 8.3",
+  "short_name": "BCF CRM 8.3",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f4f7f5",
-  "theme_color": "#173f35",
+  "background_color": "#edf3ef",
+  "theme_color": "#003326",
   "icons": [
     {
       "src": "icon-192.png",
@@ -18,5 +18,6 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "description": "BearCrest Funding professional lending CRM Version 8.3"
 }

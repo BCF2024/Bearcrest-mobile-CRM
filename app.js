@@ -1,6 +1,6 @@
 
 const $=id=>document.getElementById(id);
-const CFG_KEY="bearcrest_v8_config";
+const CFG_KEY="bearcrest_v83_config";
 let config=JSON.parse(localStorage.getItem(CFG_KEY)||'{"webAppUrl":""}');
 let loans=[], applications=[], lenders=[], currentDocuments=[];
 const FALLBACK_LENDERS=["ABL Funding","Anchor Loans","Congo Capital","Constructive Capital","Deephaven Mortgage","Easy Street Capital","EquityMax","First Equity Funding","Groundfloor","IceCap Group","Kiavi","Lima One Capital","New Silver","Quickline Capital","RCN Capital","ROC360","Rock Capital","Ternus Lending","Tidal Loans","Unitas Funding","Velocity Mortgage Capital","Visio Lending"];
@@ -8,6 +8,15 @@ const today=()=>new Date().toISOString().slice(0,10);
 const money=v=>v?new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(Number(v)):"";
 const esc=s=>String(s??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
 const fields=["recordId","loanNumber","dateReceived","borrowerName","entityName","phone","email","program","propertyAddress","loanAmount","purchasePrice","rehabBudget","arv","status","lender","nextFollowUp","targetClosing","missingDocs","notes"];
+
+
+function updateGreeting(){
+ const el=$("dashboardGreeting");
+ if(!el) return;
+ const hour=new Date().getHours();
+ const greeting=hour<12?"Good morning":hour<17?"Good afternoon":"Good evening";
+ el.textContent=`${greeting}, Joel.`;
+}
 
 function setSync(text,good=false){$("syncStatus").textContent=text;$("syncStatus").style.color=good?"#c9f2dc":"#f4dfad"}
 function renderLenderOptions(selected=""){
@@ -24,12 +33,18 @@ function renderLenderOptions(selected=""){
 }
 
 function requireUrl(){if(!config.webAppUrl){openSettings();throw new Error("Connection required")}}
-async function api(action,payload={}){
-  requireUrl(); setSync("Syncing…");
-  const res=await fetch(config.webAppUrl,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action,payload})});
+async function api(action,payload={},urlOverride=""){
+  if(!urlOverride) requireUrl(); setSync("Syncing…");
+  const target=(urlOverride||config.webAppUrl||"").trim();
+  if(!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/i.test(target)) throw new Error("Use the Google Apps Script Web App URL ending in /exec.");
+  const res=await fetch(target,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action,payload})});
   if(!res.ok) throw new Error("Connection failed");
   const data=await res.json();
-  if(!data.ok) throw new Error(data.error||"Request failed");
+  if(!data.ok){
+    const msg=data.error||"Request failed";
+    if(/Unknown action/i.test(msg)) throw new Error("Your Google Apps Script backend is an older version. Replace it with the included V8.3 backend and deploy a NEW web-app version, then paste the new /exec URL in Settings.");
+    throw new Error(msg);
+  }
   setSync("Google connected",true);
   return data.data;
 }
@@ -43,6 +58,7 @@ document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>setView(b.data
 async function loadAll(){
  try{
   const data=await api("getAll");
+  if(data.backendVersion && String(data.backendVersion)!=="8.3") throw new Error(`Backend version ${data.backendVersion} is connected. Deploy the included Version 8.3 Apps Script and use its /exec URL.`);
   loans=data.loans||[]; applications=data.applications||[]; lenders=(data.lenders&&data.lenders.length)?data.lenders:FALLBACK_LENDERS.map(name=>({name}));
   renderLenderOptions();
   renderAll();
@@ -166,8 +182,23 @@ function openSettings(){$("webAppUrl").value=config.webAppUrl||"";renderLenderMa
 $("settingsBtn").onclick=openSettings;
 $("settingsForm").onsubmit=e=>{e.preventDefault();config.webAppUrl=$("webAppUrl").value.trim();localStorage.setItem(CFG_KEY,JSON.stringify(config));$("settingsDialog").close();loadAll()}
 $("closeSettings").onclick=$("closeSettings2").onclick=()=>$("settingsDialog").close();
-if("serviceWorker" in navigator)navigator.serviceWorker.register("./service-worker.js");
+if($("testConnectionBtn")) $("testConnectionBtn").onclick=async()=>{
+ const result=$("connectionResult"),url=$("webAppUrl").value.trim();
+ result.textContent="Testing…";result.className="connection-result";
+ try{
+  const data=await api("ping",{},url);
+  if(String(data.version||"")!=="8.3") throw new Error(`Connected backend is Version ${data.version||"unknown"}, not 8.3.`);
+  result.textContent="Connected successfully to BearCrest CRM backend Version 8.3.";result.className="connection-result good";
+ }catch(err){result.textContent=err.message;result.className="connection-result bad";}
+};
+
+if("serviceWorker" in navigator){
+ navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.update()));
+ navigator.serviceWorker.register("./service-worker.js?v=83");
+}
 lenders=FALLBACK_LENDERS.map(name=>({name}));
+updateGreeting();
+setInterval(updateGreeting,60000);
 renderLenderOptions();
 renderAll();
 if(config.webAppUrl)loadAll();else{setSync("Connection needed");setTimeout(openSettings,300)}

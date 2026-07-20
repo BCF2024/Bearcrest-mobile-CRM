@@ -1,0 +1,19 @@
+BearCrest CRM Version 8.2.3
+
+Fixes included:
+- Dynamic local-time greeting (morning, afternoon, evening).
+- Green Call, Text, Email, and Directions buttons matching the approved design.
+- Polished BearCrest green, gold, and white desktop/mobile styling.
+- Better lender-manager error message when an older Apps Script deployment is connected.
+- New service-worker cache version so old colors and files are replaced.
+
+IMPORTANT FOR LENDER MANAGER:
+1. Open Google_Apps_Script_Code.gs from this package.
+2. Preserve your existing SPREADSHEET_ID and ROOT_DRIVE_FOLDER_ID values.
+3. Replace the old Apps Script code with this complete file.
+4. Save.
+5. Run setupBearCrestCRM() once and approve permissions if requested.
+6. Click Deploy > Manage deployments > Edit (pencil) > Version: New version > Deploy.
+7. Copy the /exec Web App URL and paste it into CRM Settings.
+
+An "Unknown action" message means the browser is still connected to an old Apps Script deployment.

@@ -1,0 +1,24 @@
+BEARCREST CRM VERSION 8.3
+
+WHAT CHANGED
+- Rebuilt green, gold, and white visual theme to more closely match the approved BearCrest CRM design.
+- Replaced text symbols with clean white SVG icons on green Call, Text, Email, and Directions buttons.
+- Corrected greeting to use the device's local time and refresh every minute.
+- Added lender manager in Settings: add, rename, and remove lenders permanently.
+- Added a Test Connection button that verifies the Google Apps Script backend is Version 8.3.
+- Improved error messages for old Apps Script deployments and invalid URLs.
+- Added cache cleanup and a new service-worker cache version to prevent old styling from remaining installed.
+- Kept fallback lenders so the Assigned Lender dropdown never opens empty.
+
+REQUIRED GOOGLE APPS SCRIPT UPDATE
+1. Open the existing Apps Script project.
+2. Replace the old code with Google_Apps_Script_Code.gs from this ZIP.
+3. Preserve the Spreadsheet ID and Drive Folder ID already included in CONFIG.
+4. Save and run setupBearCrestCRM() once.
+5. Choose Deploy > Manage deployments > Edit.
+6. Select New version and deploy.
+7. Copy the /exec URL.
+8. Open CRM Settings, paste the URL, click Test Connection, then Save Connection.
+
+IMPORTANT
+An old deployment can still return "Unknown action" even when the editor contains the new code. You must deploy a NEW VERSION of the web app.

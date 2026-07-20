@@ -1,0 +1,31 @@
+BEARCREST CRM VERSION 8.3 — INSTALLATION
+
+1. GOOGLE APPS SCRIPT
+- Open the existing BearCrest Apps Script project.
+- Delete all existing code in Code.gs.
+- Paste the complete contents of Google_Apps_Script_Code.gs.
+- Save.
+- Select setupBearCrestCRM and click Run once. Approve permissions if requested.
+- Choose Deploy > Manage deployments > Edit.
+- Under Version, choose New version.
+- Execute as: Me.
+- Who has access: Anyone.
+- Deploy and copy the URL ending in /exec.
+
+2. GITHUB
+- Upload/replace every frontend file from this package in the GitHub Pages repository:
+  index.html, app.js, styles.css, manifest.json, service-worker.js, and all PNG icon files.
+- Commit the changes and wait for GitHub Pages to publish.
+
+3. CONNECT
+- Open the CRM, choose Settings, and paste the new Apps Script /exec URL.
+- Click Test Connection. It should report Version 8.3.
+- Save Connection.
+
+4. CLEAR THE OLD APP CACHE
+- On Windows, press Ctrl+Shift+R.
+- If installed as an app/PWA, close it fully and reopen it. If the old design remains, uninstall and reinstall the PWA once.
+
+LENDER MANAGER
+- Settings > Lender Manager allows Add, Rename, and Remove.
+- Added lenders are written to the Lenders tab and immediately appear in Assigned Lender dropdowns.
