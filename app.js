@@ -3,6 +3,7 @@ const $=id=>document.getElementById(id);
 const CFG_KEY="bearcrest_v8_config";
 let config=JSON.parse(localStorage.getItem(CFG_KEY)||'{"webAppUrl":""}');
 let loans=[], applications=[], lenders=[], currentDocuments=[];
+const FALLBACK_LENDERS=["ABL Funding","Anchor Loans","Congo Capital","Constructive Capital","Deephaven Mortgage","Easy Street Capital","EquityMax","First Equity Funding","Groundfloor","IceCap Group","Kiavi","Lima One Capital","New Silver","Quickline Capital","RCN Capital","ROC360","Rock Capital","Ternus Lending","Tidal Loans","Unitas Funding","Velocity Mortgage Capital","Visio Lending"];
 const today=()=>new Date().toISOString().slice(0,10);
 const money=v=>v?new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(Number(v)):"";
 const esc=s=>String(s??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
@@ -13,7 +14,8 @@ function renderLenderOptions(selected=""){
  const select=$("lender");
  if(!select) return;
  const current=selected || select.value || "";
- const names=[...new Set((lenders||[]).map(x=>typeof x==="string"?x:(x.name||x.lenderName||"")).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+ const live=(lenders||[]).map(x=>typeof x==="string"?x:(x.name||x.lenderName||"")).filter(Boolean);
+ const names=[...new Set([...FALLBACK_LENDERS,...live])].sort((a,b)=>a.localeCompare(b));
  select.innerHTML='<option value="">Select a lender…</option>'+names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("")+'<option value="__OTHER__">Other / Add New</option>';
  if(current && names.includes(current)) select.value=current;
  else if(current){
@@ -41,10 +43,10 @@ document.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>setView(b.data
 async function loadAll(){
  try{
   const data=await api("getAll");
-  loans=data.loans||[]; applications=data.applications||[]; lenders=data.lenders||[];
+  loans=data.loans||[]; applications=data.applications||[]; lenders=(data.lenders&&data.lenders.length)?data.lenders:FALLBACK_LENDERS.map(name=>({name}));
   renderLenderOptions();
   renderAll();
- }catch(e){setSync("Not connected"); if(config.webAppUrl) alert(e.message)}
+ }catch(e){lenders=FALLBACK_LENDERS.map(name=>({name}));renderLenderOptions();renderAll();setSync("Offline lender list loaded"); if(config.webAppUrl) alert(e.message)}
 }
 const overdue=l=>l.nextFollowUp&&l.nextFollowUp<today()&&!["Closed","Dead"].includes(l.status);
 const due=l=>l.nextFollowUp&&l.nextFollowUp<=today()&&!["Closed","Dead"].includes(l.status);
@@ -160,22 +162,60 @@ $("documentInput").onchange=async e=>{
  }
  e.target.value="";currentDocuments=await api("getDocuments",{recordId});renderDocuments();
 }
-function openSettings(){$("webAppUrl").value=config.webAppUrl||"";$("settingsDialog").showModal()}
+function openSettings(){$("webAppUrl").value=config.webAppUrl||"";renderLenderManager();$("settingsDialog").showModal()}
 $("settingsBtn").onclick=openSettings;
 $("settingsForm").onsubmit=e=>{e.preventDefault();config.webAppUrl=$("webAppUrl").value.trim();localStorage.setItem(CFG_KEY,JSON.stringify(config));$("settingsDialog").close();loadAll()}
 $("closeSettings").onclick=$("closeSettings2").onclick=()=>$("settingsDialog").close();
 if("serviceWorker" in navigator)navigator.serviceWorker.register("./service-worker.js");
+lenders=FALLBACK_LENDERS.map(name=>({name}));
+renderLenderOptions();
 renderAll();
 if(config.webAppUrl)loadAll();else{setSync("Connection needed");setTimeout(openSettings,300)}
 
-$("lender").onchange=()=>{
+$("lender").onchange=async()=>{
  if($("lender").value==="__OTHER__"){
    const name=prompt("Enter the lender name:");
-   if(name){
-     lenders.push({name});
-     renderLenderOptions(name.trim());
+   if(name && name.trim()){
+     const saved=await addManagedLender(name.trim());
+     if(saved) renderLenderOptions(name.trim()); else $("lender").value="";
    }else{
      $("lender").value="";
    }
  }
 };
+
+function lenderNames(){
+ return [...new Set((lenders||[]).map(x=>typeof x==="string"?x:(x.name||x.lenderName||"")).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+}
+function renderLenderManager(){
+ const box=$("lenderManagerList");
+ if(!box) return;
+ const names=lenderNames();
+ box.innerHTML=names.map(name=>`<div class="manager-item"><strong>${esc(name)}</strong><button type="button" class="rename-lender" data-name="${esc(name)}">Rename</button><button type="button" class="remove-lender" data-name="${esc(name)}">Remove</button></div>`).join("")||'<div class="manager-empty">No lenders are available.</div>';
+ box.querySelectorAll(".rename-lender").forEach(btn=>btn.onclick=()=>renameManagedLender(btn.dataset.name));
+ box.querySelectorAll(".remove-lender").forEach(btn=>btn.onclick=()=>removeManagedLender(btn.dataset.name));
+}
+async function addManagedLender(name){
+ name=String(name||"").trim();
+ if(!name){alert("Enter a lender name.");return false}
+ try{
+  await api("addLender",{name});
+  await loadAll();
+  renderLenderManager();
+  return true;
+ }catch(err){alert(err.message);return false}
+}
+async function renameManagedLender(oldName){
+ const newName=prompt("Rename lender:",oldName);
+ if(newName===null||!newName.trim()||newName.trim()===oldName) return;
+ try{await api("renameLender",{oldName,newName:newName.trim()});await loadAll();renderLenderManager()}catch(err){alert(err.message)}
+}
+async function removeManagedLender(name){
+ if(!confirm(`Remove ${name} from future lender lists? Existing loan records will keep the lender name.`)) return;
+ try{await api("deleteLender",{name});await loadAll();renderLenderManager()}catch(err){alert(err.message)}
+}
+if($("addLenderBtn")) $("addLenderBtn").onclick=async()=>{
+ const input=$("newLenderName");
+ if(await addManagedLender(input.value)) input.value="";
+};
+if($("newLenderName")) $("newLenderName").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();$("addLenderBtn").click()}};

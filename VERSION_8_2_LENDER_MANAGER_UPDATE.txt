@@ -1,0 +1,13 @@
+BEARCREST CRM VERSION 8.2 - LENDER MANAGER UPDATE
+
+NEW:
+- Settings now includes a full Lender Manager.
+- Add new lenders such as Babylon Capital.
+- Rename existing lenders.
+- Remove lenders from future dropdown lists.
+- New lenders save permanently to the Google Sheet Lenders tab.
+- The Assigned Lender dropdown updates immediately.
+- "Other / Add New" in the loan screen now saves the lender permanently too.
+
+IMPORTANT DEPLOYMENT STEP:
+Replace the Google Apps Script project code with Google_Apps_Script_Code.gs from this package, save it, and deploy a NEW web-app version. Existing deployment versions do not automatically use the updated backend code.

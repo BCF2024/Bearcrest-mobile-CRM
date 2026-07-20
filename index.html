@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#173f35">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>BearCrest CRM V8</title>
+  <title>BearCrest CRM V8.2</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -15,7 +15,7 @@
 <header class="topbar">
   <div class="brand">
     <img class="brand-logo" src="icon-192.png" alt="BearCrest Funding logo">
-    <div><strong>BearCrest CRM</strong><small>Version 8 · Google Cloud Sync</small></div>
+    <div><strong>BearCrest CRM</strong><small>Version 8.2 · Google Cloud Sync</small></div>
   </div>
   <div class="top-actions">
     <span id="syncStatus" class="sync-status">Connecting…</span>
@@ -149,7 +149,7 @@
   </section>
 
   <div class="phone-actions">
-    <a id="callLink">Call</a><a id="textLink">Text</a><a id="emailLink">Email</a><a id="mapLink" target="_blank">Directions</a>
+    <a id="callLink">CALL</a><a id="textLink">TEXT</a><a id="emailLink">EMAIL</a><a id="mapLink" target="_blank">DIRECTIONS</a>
   </div>
 
   <div class="dialogactions">
@@ -161,10 +161,21 @@
 
 <dialog id="settingsDialog">
 <form id="settingsForm">
-  <div class="dialoghead"><div><p class="eyebrow">CONNECTION</p><h2>Google Apps Script</h2></div><button type="button" id="closeSettings">×</button></div>
-  <label class="single">Web App URL<input id="webAppUrl" placeholder="https://script.google.com/macros/s/.../exec"></label>
-  <p class="notice">Paste the deployed Google Apps Script Web App URL here. It is saved only in this browser.</p>
-  <div class="dialogactions"><span></span><span></span><button type="button" id="closeSettings2">Cancel</button><button class="primary" type="submit">Save Connection</button></div>
+  <div class="dialoghead"><div><p class="eyebrow">SETTINGS</p><h2>BearCrest CRM Settings</h2></div><button type="button" id="closeSettings">×</button></div>
+  <div class="settings-body">
+    <section class="settings-section">
+      <h3>Google Apps Script Connection</h3>
+      <label class="single">Web App URL<input id="webAppUrl" placeholder="https://script.google.com/macros/s/.../exec"></label>
+      <p class="notice">Paste the deployed Google Apps Script Web App URL here. It is saved only in this browser.</p>
+    </section>
+    <section class="settings-section lender-manager">
+      <div class="manager-head"><div><p class="eyebrow">LENDER MANAGER</p><h3>Assigned Lenders</h3></div></div>
+      <div class="add-lender-row"><input id="newLenderName" placeholder="Example: Babylon Capital"><button type="button" id="addLenderBtn" class="primary">+ Add Lender</button></div>
+      <p class="notice">Lenders added here are saved permanently to your Google Sheet and immediately appear in every Assigned Lender list.</p>
+      <div id="lenderManagerList" class="manager-list"></div>
+    </section>
+  </div>
+  <div class="dialogactions"><span></span><span></span><button type="button" id="closeSettings2">Close</button><button class="primary" type="submit">Save Connection</button></div>
 </form>
 </dialog>
 

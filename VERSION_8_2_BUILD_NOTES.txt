@@ -1,0 +1,16 @@
+BEARCREST CRM VERSION 8.2 - REBUILT
+
+Changes completed:
+- Professional dark green, gold, and white interface on desktop and mobile.
+- Larger professional Call, Text, Email, and Directions controls.
+- Improved desktop, phone, and foldable layouts.
+- Lender dropdown now always displays a built-in lender list.
+- Google Sheet lender list is merged with the built-in list.
+- Backend lender reader now accepts common header names such as Lender, Lender Name, or Name.
+- Empty or missing Lenders sheet is automatically populated.
+- Duplicate lenders are removed.
+- Existing duplicate-save protection remains enabled.
+
+IMPORTANT GOOGLE APPS SCRIPT STEP:
+Replace your deployed Apps Script project code with Google_Apps_Script_Code.gs,
+enter your Sheet ID and Drive Folder ID, run setupBearCrestCRM(), and deploy a new version.

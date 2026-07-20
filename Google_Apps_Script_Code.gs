@@ -17,7 +17,7 @@ const LOAN_HEADERS = [
 ];
 
 function doGet() {
-  return json_({ok:true,data:{message:'BearCrest CRM V8 backend is live'}});
+  return json_({ok:true,data:{message:'BearCrest CRM V8.2 backend is live'}});
 }
 
 function doPost(e) {
@@ -35,6 +35,9 @@ function doPost(e) {
       case 'getDocuments': data = getDocuments_(payload.recordId); break;
       case 'uploadDocument': data = uploadDocument_(payload); break;
       case 'deleteDocument': data = deleteDocument_(payload.fileId); break;
+      case 'addLender': data = addLender_(payload.name); break;
+      case 'renameLender': data = renameLender_(payload.oldName, payload.newName); break;
+      case 'deleteLender': data = deleteLender_(payload.name); break;
       default: throw new Error('Unknown action: ' + action);
     }
     return json_({ok:true,data});
@@ -77,7 +80,7 @@ function setupBearCrestCRM() {
   } else {
     ensureApplicationTrackingColumns_();
   }
-  return 'BearCrest CRM V8 setup complete.';
+  return 'BearCrest CRM V8.2 setup complete.';
 }
 
 function getAll_() {
@@ -91,20 +94,103 @@ function getAll_() {
 
 
 function getLenders_() {
+  const fallback = [
+    'Unitas Funding','Visio Lending','Kiavi','Congo Capital','Easy Street Capital','Rock Capital',
+    'RCN Capital','Lima One Capital','New Silver','Quickline Capital','Ternus Lending','Tidal Loans',
+    'IceCap Group','Groundfloor','ABL Funding','EquityMax','Anchor Loans','Velocity Mortgage Capital',
+    'Deephaven Mortgage','Constructive Capital','ROC360','First Equity Funding'
+  ];
   const ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
-  const sh = ss.getSheetByName(CONFIG.LENDERS_SHEET);
-  if (!sh || sh.getLastRow() < 2) return [];
+  let sh = ss.getSheetByName(CONFIG.LENDERS_SHEET);
+  if (!sh) {
+    sh = ensureSheet_(ss, CONFIG.LENDERS_SHEET, ['Lender Name','Active']);
+  }
+  if (sh.getLastRow() < 2) {
+    sh.getRange(2,1,fallback.length,2).setValues(fallback.map(n => [n,'Yes']));
+  }
   const data = sh.getDataRange().getDisplayValues();
-  const headers = data[0].map(String);
-  const nameIdx = headers.indexOf('Lender Name');
-  const activeIdx = headers.indexOf('Active');
+  const headers = data[0].map(h => String(h).trim().toLowerCase());
+  let nameIdx = headers.findIndex(h => ['lender name','lender','name'].includes(h));
+  let activeIdx = headers.findIndex(h => ['active','status','enabled'].includes(h));
+  if (nameIdx < 0) nameIdx = 0;
   const out = [];
   for (let i=1;i<data.length;i++) {
-    const name = nameIdx >= 0 ? String(data[i][nameIdx]).trim() : '';
-    const active = activeIdx >= 0 ? String(data[i][activeIdx]).trim().toLowerCase() : 'yes';
-    if (name && !['no','false','inactive'].includes(active)) out.push({name:name});
+    const name = String(data[i][nameIdx] || '').trim();
+    const active = activeIdx >= 0 ? String(data[i][activeIdx] || '').trim().toLowerCase() : 'yes';
+    if (name && !['no','false','inactive','disabled','0'].includes(active)) out.push({name:name});
   }
-  return out;
+  if (!out.length) return fallback.map(name => ({name:name}));
+  const seen = {};
+  return out.filter(x => {
+    const key = x.name.toLowerCase();
+    if (seen[key]) return false;
+    seen[key] = true;
+    return true;
+  }).sort((a,b) => a.name.localeCompare(b.name));
+}
+
+
+function addLender_(name) {
+  ensureReady_();
+  name = String(name || '').trim();
+  if (!name) throw new Error('Enter a lender name.');
+  const ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
+  const sh = ss.getSheetByName(CONFIG.LENDERS_SHEET);
+  const data = sh.getDataRange().getDisplayValues();
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0] || '').trim().toLowerCase() === name.toLowerCase()) {
+      sh.getRange(i + 1, 2).setValue('Yes');
+      return {name:name, existed:true};
+    }
+  }
+  sh.appendRow([name, 'Yes']);
+  sortLenders_(sh);
+  log_('LENDER_ADD', '', '', name);
+  return {name:name, existed:false};
+}
+
+function renameLender_(oldName, newName) {
+  ensureReady_();
+  oldName = String(oldName || '').trim();
+  newName = String(newName || '').trim();
+  if (!oldName || !newName) throw new Error('Both lender names are required.');
+  const ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
+  const sh = ss.getSheetByName(CONFIG.LENDERS_SHEET);
+  const data = sh.getDataRange().getDisplayValues();
+  for (let i = 1; i < data.length; i++) {
+    const existing = String(data[i][0] || '').trim();
+    if (existing.toLowerCase() === newName.toLowerCase() && existing.toLowerCase() !== oldName.toLowerCase()) throw new Error('That lender already exists.');
+  }
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0] || '').trim().toLowerCase() === oldName.toLowerCase()) {
+      sh.getRange(i + 1, 1).setValue(newName);
+      sortLenders_(sh);
+      log_('LENDER_RENAME', '', '', oldName + ' -> ' + newName);
+      return {oldName:oldName,newName:newName};
+    }
+  }
+  throw new Error('Lender not found.');
+}
+
+function deleteLender_(name) {
+  ensureReady_();
+  name = String(name || '').trim();
+  if (!name) throw new Error('Lender name is required.');
+  const ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
+  const sh = ss.getSheetByName(CONFIG.LENDERS_SHEET);
+  const data = sh.getDataRange().getDisplayValues();
+  for (let i = data.length - 1; i >= 1; i--) {
+    if (String(data[i][0] || '').trim().toLowerCase() === name.toLowerCase()) {
+      sh.deleteRow(i + 1);
+      log_('LENDER_DELETE', '', '', name);
+      return true;
+    }
+  }
+  return false;
+}
+
+function sortLenders_(sh) {
+  if (sh.getLastRow() > 2) sh.getRange(2, 1, sh.getLastRow() - 1, Math.max(2, sh.getLastColumn())).sort({column:1,ascending:true});
 }
 
 function getNextLoanNumber_() {
